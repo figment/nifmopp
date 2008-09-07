@@ -1,10 +1,11 @@
 EXPORTS
-    _GenerateMoppCode@16
-    _RetrieveMoppCode@8
-    _RetrieveMoppOrigin@4
-    _RetrieveMoppScale@4
-    GenerateMoppCode=_GenerateMoppCode@16
-    RetrieveMoppCode=_RetrieveMoppCode@8
-    RetrieveMoppOrigin=_RetrieveMoppOrigin@4
-    RetrieveMoppScale=_RetrieveMoppScale@4
+    GenerateMoppCode
+    RetrieveMoppCode
+    RetrieveMoppOrigin
+    RetrieveMoppScale
+    CalcMassPropertiesSphere
+    CalcMassPropertiesBox
+    CalcMassPropertiesCylinder
+    CalcMassPropertiesCapsule
+    CalcMassPropertiesPolyhedron
     

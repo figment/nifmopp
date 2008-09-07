@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\niflib\include&quot;;&quot;$(ProjectDir)Loki/include&quot;;&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Source&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Source&quot;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS;_USRDLL;GENMOPP_EXPORTS;_WIN32_WINNT=0x500;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;USE_NIFLIB_TEMPLATE_HELPERS;NIFLIB_STATIC_LINK;_SCL_SECURE_NO_WARNINGS"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -60,7 +60,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\niflib\lib&quot;;&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Lib\win32_net_8-0\debug_multithreaded&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Lib\win32_net_8-0\debug_multithreaded&quot;"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -116,7 +116,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\niflib\include&quot;;&quot;$(ProjectDir)Loki/include&quot;;&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Source&quot;"
+				AdditionalIncludeDirectories="&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Source&quot;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;GENMOPP_EXPORTS;_WIN32_WINNT=0x500;_CRT_SECURE_NO_DEPRECATE;_CRT_NONSTDC_NO_DEPRECATE;USE_NIFLIB_TEMPLATE_HELPERS;NIFLIB_STATIC_LINK;_SCL_SECURE_NO_WARNINGS"
 				RuntimeLibrary="0"
 				WarningLevel="3"
@@ -134,7 +134,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\niflib\lib&quot;;&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Lib\win32_net_8-0\release_multithreaded&quot;"
+				AdditionalLibraryDirectories="&quot;$(ProjectDir)..\..\..\..\vendor\Havok\hk550\Lib\win32_net_8-0\release_multithreaded&quot;"
 				ModuleDefinitionFile="$(ProjectName).def"
 				GenerateDebugInformation="true"
 				SubSystem="2"
@@ -180,12 +180,24 @@
 				RelativePath=".\genmopp.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\inertiahelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\program.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
 			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
 			>
+			<File
+				RelativePath=".\NifMopp.h"
+				>
+			</File>
 			<File
 				RelativePath=".\resource.h"
 				>
