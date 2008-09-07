@@ -35,16 +35,7 @@
 //
 // ***** END LICENSE BLOCK *****
 
-#include "obj/NiTriBasedGeom.h"
-#include "obj/NiTriBasedGeomData.h"
-#include "obj/NiTriShape.h"
-#include "obj/NiTriStrips.h"
-#include "obj/bhkRigidBody.h"
-#include "obj/bhkMoppBvTreeShape.h"
-#include "obj/bhkNiTriStripsShape.h"
-#include "obj/NiTriStripsData.h"
-#include "obj/hkPackedNiTriStripsData.h"
-#include "obj/bhkPackedNiTriStripsShape.h"
+#include "NifMopp.h"
 
 //
 // Math and base include
@@ -79,7 +70,7 @@
 #pragma managed(push, off)
 #endif
 
-static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Niflib::Vector3 const* verts, int nTris, Niflib::Triangle const * tris)
+static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Point3 const* verts, int nTris, Triangle const * tris)
 {
 	hkpSimpleMeshShape * storageMeshShape = new hkpSimpleMeshShape( 0.01f );
 	hkArray<hkVector4> &vertices = storageMeshShape->m_vertices;
@@ -87,7 +78,7 @@ static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Niflib::Vector3 const* v
 
 	triangles.setSize( 0 );
 	for (int i=0;i<nTris;++i) {
-		Niflib::Triangle const &tri = tris[i];
+		Triangle const &tri = tris[i];
 		hkpSimpleMeshShape::Triangle hktri;
 		hktri.m_a = tri[0];
 		hktri.m_b = tri[1];
@@ -97,7 +88,7 @@ static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Niflib::Vector3 const* v
 
 	vertices.setSize( 0 );
 	for (int i=0;i<nVerts;++i) {
-		Niflib::Vector3 const &vert = verts[i];
+		Point3 const &vert = verts[i];
 		vertices.pushBack( hkVector4(vert.x, vert.y, vert.z) );
 	}
 	//storageMeshShape->setRadius(1.0f);
@@ -106,60 +97,17 @@ static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Niflib::Vector3 const* v
 
 static hkpMoppCode* k_phkpMoppCode = NULL;
 
-
-
-static void HK_CALL errorReport(const char* msg, void*)
-{
-	//printf("%s", msg);
-}
-
-
-static hkThreadMemory* threadMemory = NULL;
-static char* stackBuffer = NULL;
-static void InitializeHavok()
-{
-	if ( threadMemory == NULL )
-	{
-		// Initialize the base system including our memory system
-		hkPoolMemory* memoryManager = new hkPoolMemory();
-		threadMemory = new hkThreadMemory(memoryManager, 16);
-		hkBaseSystem::init( memoryManager, threadMemory, errorReport );
-		memoryManager->removeReference();
-
-		// We now initialize the stack area to 100k (fast temporary memory to be used by the engine).
-		{
-			int stackSize = 0x100000;
-			stackBuffer = hkAllocate<char>( stackSize, HK_MEMORY_CLASS_BASE);
-			hkThreadMemory::getInstance().setStackArea( stackBuffer, stackSize);
-		}
-	}
-}
-
-static void CloseHavok()
+extern void CloseHavokMopp()
 {
 	if (k_phkpMoppCode)
 	{
 		k_phkpMoppCode->removeReference();
 		k_phkpMoppCode = NULL;
 	}
-
-	// Deallocate stack area
-	if (threadMemory)
-	{
-		threadMemory->setStackArea(0, 0);
-		hkDeallocate(stackBuffer);
-
-		threadMemory->removeReference();
-		threadMemory = NULL;
-		stackBuffer = NULL;
-	}
-
-	// Quit base system
-	hkBaseSystem::quit();
 }
 
 
-static int InternalGenerateCode(int nVerts, Niflib::Vector3 const* verts, int nTris, Niflib::Triangle const *tris)
+static int InternalGenerateCode(int nVerts, Point3 const* verts, int nTris, Triangle const *tris)
 {
 	int retCode = 0;
 	InitializeHavok();
@@ -184,8 +132,8 @@ static int InternalGenerateCode(int nVerts, Niflib::Vector3 const* verts, int nT
 	return k_phkpMoppCode->m_data.getSize();
 }
 
-extern "C" __declspec(dllexport)
-int __stdcall GenerateMoppCode(int nVerts, Niflib::Vector3 const* verts, int nTris, Niflib::Triangle const *tris)
+extern "C" 
+int __stdcall GenerateMoppCode(int nVerts, Point3 const* verts, int nTris, Triangle const *tris)
 {
 	int retcode = 0;
 	__try
@@ -199,7 +147,7 @@ int __stdcall GenerateMoppCode(int nVerts, Niflib::Vector3 const* verts, int nTr
 	return retcode;
 }
 
-extern "C" __declspec(dllexport)
+extern "C" 
 int __stdcall RetrieveMoppCode(int nBuffer, hkUint8 *buffer)
 {
 	if ( k_phkpMoppCode == NULL )
@@ -212,7 +160,7 @@ int __stdcall RetrieveMoppCode(int nBuffer, hkUint8 *buffer)
 	return k_phkpMoppCode->m_data.getSize();
 }
 
-extern "C" __declspec(dllexport)
+extern "C" 
 int __stdcall RetrieveMoppScale(float *value)
 {
 	if ( k_phkpMoppCode == NULL )
@@ -225,7 +173,7 @@ int __stdcall RetrieveMoppScale(float *value)
 	return 1;
 }
 
-extern "C" __declspec(dllexport)
+extern "C" 
 int __stdcall RetrieveMoppOrigin( float value[3] )
 {
 	if ( k_phkpMoppCode == NULL )
@@ -239,17 +187,6 @@ int __stdcall RetrieveMoppOrigin( float value[3] )
 	value[2] = k_phkpMoppCode->m_info.m_offset(2);
 	return 1;
 }
-
-BOOL APIENTRY DllMain( HMODULE hModule,
-                       DWORD  ul_reason_for_call,
-                       LPVOID lpReserved
-					 )
-{
-	if ( ul_reason_for_call == DLL_PROCESS_DETACH )
-		CloseHavok();
-    return TRUE;
-}
-
 
 #ifdef _MANAGED
 #pragma managed(pop)
