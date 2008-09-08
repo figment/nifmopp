@@ -46,7 +46,7 @@ struct Matrix43
 
 struct Matrix44
 {
-	float m[4][3];
+	float m[4][4];
 };
 
 extern void InitializeHavok();
