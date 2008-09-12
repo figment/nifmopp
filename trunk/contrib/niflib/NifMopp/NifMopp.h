@@ -12,9 +12,9 @@ struct Point3
 
 struct Triangle
 {
-	unsigned int a, b, c;
+	unsigned short a, b, c;
 
-	unsigned int operator[](size_t i) const {
+	unsigned short operator[](size_t i) const {
 		switch (i)
 		{
 		case 0: return a;
@@ -23,7 +23,7 @@ struct Triangle
 		default: throw std::exception("Invalid index");
 		}
 	}
-	unsigned int& operator[](size_t i) {
+	unsigned short& operator[](size_t i) {
 		switch (i)
 		{
 		case 0: return a;
