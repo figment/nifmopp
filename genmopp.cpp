@@ -70,7 +70,7 @@
 #pragma managed(push, off)
 #endif
 
-static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Point3 const* verts, int nTris, Triangle const * tris)
+static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Point3 const* verts, int nTris, Triangle const * tris, int vertOffset = 0)
 {
 	hkpSimpleMeshShape * storageMeshShape = new hkpSimpleMeshShape( 0.01f );
 	hkArray<hkVector4> &vertices = storageMeshShape->m_vertices;
@@ -80,9 +80,9 @@ static hkpSimpleMeshShape* ConstructHKMesh( int nVerts, Point3 const* verts, int
 	for (int i=0;i<nTris;++i) {
 		Triangle const &tri = tris[i];
 		hkpSimpleMeshShape::Triangle hktri;
-		hktri.m_a = tri[0];
-		hktri.m_b = tri[1];
-		hktri.m_c = tri[2];
+		hktri.m_a = tri[0] - vertOffset;
+		hktri.m_b = tri[1] - vertOffset;
+		hktri.m_c = tri[2] - vertOffset;
 		triangles.pushBack( hktri );
 	}
 
@@ -130,6 +130,82 @@ static int InternalGenerateCode(int nVerts, Point3 const* verts, int nTris, Tria
 	list->removeReference();
 
 	return k_phkpMoppCode->m_data.getSize();
+}
+static int InternalGenerateCodeWithSubshapes(int nShapes, int *subShapes, int nVerts, Point3 const* verts, int nTris, Triangle const *tris)
+{
+	int retCode = 0;
+	InitializeHavok();
+
+	if (k_phkpMoppCode)
+	{
+		k_phkpMoppCode->removeReference();
+		k_phkpMoppCode = NULL;
+	}
+
+	//int voff = 0;
+	//int toff = 0;
+
+	//hkpShape** shapes = new hkpShape*[nShapes];
+
+	//for (int i = 0; i<nShapes; ++i) {
+	//	int vend = (voff + subShapes[i] );
+	//	int tend = toff;
+	//	while ( tend < nTris ) {
+	//		Triangle const & t = tris[tend];
+	//		if ( t.a >= vend || t.b >= vend || t.c >= vend )
+	//			break;
+	//		tend++;
+	//	}
+	//	hkpSimpleMeshShape* shape = ConstructHKMesh(vend-voff, &verts[voff], tend-toff, &tris[toff], voff);
+	//	shapes[i] = shape;
+ //     voff = vend;
+ //     toff = tend;
+	//}
+
+	//hkpListShape* list = new hkpListShape(&shapes[0], nShapes);
+
+	hkpSimpleMeshShape* list = ConstructHKMesh(nVerts, verts, nTris, tris);
+   list->setRadius(0.1000f);
+
+	hkArray<hkUint8> &materialIndices = list->m_materialIndices;
+
+	materialIndices.setSize(nShapes);
+	for (int i = 0; i<nShapes; ++i)
+		materialIndices[i] = subShapes[i];
+
+	hkpMoppCompilerInput mfr;
+	mfr.setAbsoluteFitToleranceOfAxisAlignedTriangles( hkVector4( 0.1945f, 0.1945f, 0.1945f ) );
+	mfr.setAbsoluteFitToleranceOfTriangles(0.1945f);
+	mfr.setAbsoluteFitToleranceOfInternalNodes(0.3f);
+
+	k_phkpMoppCode = hkpMoppUtility::buildCode(list, mfr);
+
+	//for (int i = 0; i<nShapes; ++i) {
+	//	shapes[i]->removeReference();
+	//}
+	//delete [] shapes;
+
+	list->removeReference();
+
+	return k_phkpMoppCode->m_data.getSize();
+}
+
+extern "C" 
+int __stdcall GenerateMoppCodeWithSubshapes(int nShapes, int *shapeVerts, int nVerts, Point3 const* verts, int nTris, Triangle const *tris)
+{
+	int retcode = 0;
+	__try
+	{
+		if (nShapes <= 1)
+			retcode = InternalGenerateCode(nVerts, verts, nTris, tris);
+		else
+			retcode = InternalGenerateCodeWithSubshapes(nShapes, shapeVerts, nVerts, verts, nTris, tris);
+	}
+	__except( EXCEPTION_EXECUTE_HANDLER )
+	{
+		retcode = -1;
+	}
+	return retcode;
 }
 
 extern "C" 
