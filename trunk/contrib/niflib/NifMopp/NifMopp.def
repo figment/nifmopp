@@ -1,5 +1,6 @@
 EXPORTS
     GenerateMoppCode
+    GenerateMoppCodeWithSubshapes
     RetrieveMoppCode
     RetrieveMoppOrigin
     RetrieveMoppScale
